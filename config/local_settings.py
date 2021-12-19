@@ -122,7 +122,7 @@ SERVER_EMAIL = 'DMOJ: Modern Online Judge <errors@dmoj.ca>'
 # webserver to serve the static files. This is the directory where all the
 # static files DMOJ uses will be collected to.
 # You must configure your webserver to serve this directory as /static/ in production.
-STATIC_ROOT = '/home/vagrant/online-judge/resources/static'
+STATIC_ROOT = '/home/vagrant/online-judge/static'
 
 # URL to access static files.
 #STATIC_URL = '/static/'
@@ -264,14 +264,14 @@ LOGGING = {
     },
     'handlers': {
         # You may use this handler as example for logging to other files..
-        'bridge': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/home/vagrant/online-judge/logs/std_bridge.log',
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 10,
-            'formatter': 'file',
-        },
+        #'bridge': {
+        #    'level': 'INFO',
+        #    'class': 'logging.handlers.RotatingFileHandler',
+        #    'filename': '/home/vagrant/online-judge/logs/std_bridge.log',
+        #    'maxBytes': 10 * 1024 * 1024,
+        #    'backupCount': 10,
+        #    'formatter': 'file',
+        #},
         'mail_admins': {
             'level': 'ERROR',
             'class': 'dmoj.throttle_mail.ThrottledEmailHandler',
@@ -290,11 +290,11 @@ LOGGING = {
             'propagate': False,
         },
         # Judging logs as received by bridged.
-        'judge.bridge': {
-            'handlers': ['bridge', 'mail_admins'],
-            'level': 'INFO',
-            'propagate': True,
-        },
+        #'judge.bridge': {
+        #    'handlers': ['bridge', 'mail_admins'],
+        #    'level': 'INFO',
+        #    'propagate': True,
+        #},
         # Catch all log to stderr.
         '': {
             'handlers': ['console'],
