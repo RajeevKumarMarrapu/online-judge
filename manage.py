@@ -3,7 +3,9 @@ import os
 import sys
 
 try:
-    import MySQLdb  # noqa: F401, imported for side effect
+    # import MySQLdb  # noqa: F401, imported for side effect
+    import pymysql
+    pymysql.install_as_MySQLdb()
 except ImportError:
     import dmoj_install_pymysql  # noqa: F401, imported for side effect
 

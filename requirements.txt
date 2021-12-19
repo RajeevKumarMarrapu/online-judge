@@ -1,4 +1,4 @@
-Django>=2.2,<3
+Django<3
 django_compressor
 django-mptt
 django-pagedown<2
@@ -37,3 +37,5 @@ webauthn<1
 bleach
 django-admin-sortable2
 icalendar
+redis
+pymysql
