@@ -38,5 +38,4 @@ bleach
 django-admin-sortable2
 icalendar
 redis
-pymysql
 uwsgi
