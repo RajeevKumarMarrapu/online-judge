@@ -122,7 +122,7 @@ SERVER_EMAIL = 'DMOJ: Modern Online Judge <errors@dmoj.ca>'
 # webserver to serve the static files. This is the directory where all the
 # static files DMOJ uses will be collected to.
 # You must configure your webserver to serve this directory as /static/ in production.
-STATIC_ROOT = '/home/rajeev/PycharmProjects/online-judge/static'
+STATIC_ROOT = '/home/vagrant/online-judge/resources/static'
 
 # URL to access static files.
 #STATIC_URL = '/static/'
@@ -190,8 +190,8 @@ EVENT_DAEMON_POLL = '/channels/'
 #EVENT_DAEMON_AMQP_EXCHANGE = '<AMQP exchange to use>'
 
 ## Celery
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
 
 ## CDN control.
 # Base URL for a copy of ace editor.
@@ -267,7 +267,7 @@ LOGGING = {
         'bridge': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/home/rajeev/PycharmProjects/online-judge/tmp/stdout.log',
+            'filename': '/home/vagrant/online-judge/logs/std_bridge.log',
             'maxBytes': 10 * 1024 * 1024,
             'backupCount': 10,
             'formatter': 'file',
