@@ -1,4 +1,4 @@
-Django<=3.2
+Django<3
 django_compressor
 django-mptt
 django-pagedown<2
@@ -38,4 +38,3 @@ bleach
 django-admin-sortable2
 icalendar
 redis
-uwsgi
