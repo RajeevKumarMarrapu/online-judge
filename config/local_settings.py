@@ -265,14 +265,14 @@ LOGGING = {
     },
     'handlers': {
         # You may use this handler as example for logging to other files..
-        #'bridge': {
-        #    'level': 'INFO',
-        #    'class': 'logging.handlers.RotatingFileHandler',
-        #    'filename': '/home/vagrant/online-judge/logs/std_bridge.log',
-        #    'maxBytes': 10 * 1024 * 1024,
-        #    'backupCount': 10,
-        #    'formatter': 'file',
-        #},
+        'bridge': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/tmp/std_bridge.log',
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 10,
+            'formatter': 'file',
+        },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'dmoj.throttle_mail.ThrottledEmailHandler',
@@ -291,11 +291,11 @@ LOGGING = {
             'propagate': False,
         },
         # Judging logs as received by bridged.
-        #'judge.bridge': {
-        #    'handlers': ['bridge', 'mail_admins'],
-        #    'level': 'INFO',
-        #    'propagate': True,
-        #},
+        'judge.bridge': {
+            'handlers': ['bridge', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': True,
+        },
         # Catch all log to stderr.
         '': {
             'handlers': ['console'],
