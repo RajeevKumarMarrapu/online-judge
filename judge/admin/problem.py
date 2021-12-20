@@ -5,8 +5,9 @@ from django.contrib import admin
 from django.db import transaction
 from django.forms import ModelForm
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.html import format_html
-from django.utils.translation import gettext, gettext_lazy as _, ungettext
+from django.utils.translation import gettext, gettext_lazy as _, ngettext
 from reversion.admin import VersionAdmin
 
 from judge.models import LanguageLimit, Problem, ProblemClarification, ProblemTranslation, Profile, Solution
@@ -109,13 +110,21 @@ class ProblemTranslationInline(admin.StackedInline):
     form = ProblemTranslationForm
     extra = 0
 
+    def has_permission_full_markup(self, request, obj=None):
+        if not obj:
+            return True
+        return request.user.has_perm('judge.problem_full_markup') or not obj.is_full_markup
+
+    has_add_permission = has_change_permission = has_delete_permission = has_permission_full_markup
+
 
 class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
     fieldsets = (
         (None, {
             'fields': (
                 'code', 'name', 'is_public', 'is_manually_managed', 'date', 'authors', 'curators', 'testers',
-                'is_organization_private', 'organizations', 'description', 'license',
+                'is_organization_private', 'organizations', 'submission_source_visibility_mode', 'is_full_markup',
+                'description', 'license',
             ),
         }),
         (_('Social Media'), {'classes': ('collapse',), 'fields': ('og_image', 'summary')}),
@@ -147,6 +156,9 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
             func, name, desc = self.get_action('make_private')
             actions[name] = (func, name, desc)
 
+        func, name, desc = self.get_action('update_publish_date')
+        actions[name] = (func, name, desc)
+
         return actions
 
     def get_readonly_fields(self, request, obj=None):
@@ -155,6 +167,10 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
             fields += ('is_public',)
         if not request.user.has_perm('judge.change_manually_managed'):
             fields += ('is_manually_managed',)
+        if not request.user.has_perm('judge.problem_full_markup'):
+            fields += ('is_full_markup',)
+            if obj and obj.is_full_markup:
+                fields += ('description',)
         return fields
 
     def show_authors(self, obj):
@@ -171,13 +187,21 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
         from judge.tasks import rescore_problem
         transaction.on_commit(rescore_problem.s(problem_id).delay)
 
+    def update_publish_date(self, request, queryset):
+        count = queryset.update(date=timezone.now())
+        self.message_user(request, ngettext("%d problem's publish date successfully updated.",
+                                            "%d problems' publish date successfully updated.",
+                                            count) % count)
+
+    update_publish_date.short_description = _('Set publish date to now')
+
     def make_public(self, request, queryset):
         count = queryset.update(is_public=True)
         for problem_id in queryset.values_list('id', flat=True):
             self._rescore(request, problem_id)
-        self.message_user(request, ungettext('%d problem successfully marked as public.',
-                                             '%d problems successfully marked as public.',
-                                             count) % count)
+        self.message_user(request, ngettext('%d problem successfully marked as public.',
+                                            '%d problems successfully marked as public.',
+                                            count) % count)
 
     make_public.short_description = _('Mark problems as public')
 
@@ -185,9 +209,9 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
         count = queryset.update(is_public=False)
         for problem_id in queryset.values_list('id', flat=True):
             self._rescore(request, problem_id)
-        self.message_user(request, ungettext('%d problem successfully marked as private.',
-                                             '%d problems successfully marked as private.',
-                                             count) % count)
+        self.message_user(request, ngettext('%d problem successfully marked as private.',
+                                            '%d problems successfully marked as private.',
+                                            count) % count)
 
     make_private.short_description = _('Mark problems as private')
 
@@ -211,7 +235,10 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
 
     def save_model(self, request, obj, form, change):
         super(ProblemAdmin, self).save_model(request, obj, form, change)
-        if form.changed_data and any(f in form.changed_data for f in ('is_public', 'points', 'partial')):
+        if (
+            form.changed_data and
+            any(f in form.changed_data for f in ('is_public', 'is_organization_private', 'points', 'partial'))
+        ):
             self._rescore(request, obj.id)
 
     def construct_change_message(self, request, form, *args, **kwargs):

@@ -3,7 +3,7 @@ from django.db.models import Count, Max
 from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.generic import ListView
 
 from judge.comments import CommentedDetailView
@@ -39,7 +39,7 @@ class PostList(ListView):
         context['page_prefix'] = reverse('blog_post_list')
         context['comments'] = Comment.most_recent(self.request.user, 10)
         context['new_problems'] = Problem.get_public_problems() \
-                                         .order_by('-date', '-id')[:settings.DMOJ_BLOG_NEW_PROBLEM_COUNT]
+                                         .order_by('-date', 'code')[:settings.DMOJ_BLOG_NEW_PROBLEM_COUNT]
         context['page_titles'] = CacheDict(lambda page: Comment.get_page_title(page))
 
         context['has_clarifications'] = False
@@ -52,7 +52,7 @@ class PostList(ListView):
 
         context['user_count'] = Profile.objects.count
         context['problem_count'] = Problem.get_public_problems().count
-        context['submission_count'] = lambda: Submission.objects.aggregate(max_id=Max('id'))['max_id']
+        context['submission_count'] = lambda: Submission.objects.aggregate(max_id=Max('id'))['max_id'] or 0
         context['language_count'] = Language.objects.count
 
         context['post_comment_counts'] = {
